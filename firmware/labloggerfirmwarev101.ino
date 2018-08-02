@@ -138,9 +138,9 @@ void doMeasurement(){
     //loop through the analog sensors first
     for (int n=0;n<settings.nrOfSensors;n++){
         
-        //if this is the fourth sensor, send data to cloud, wait a second, to not
+        //if this is an even sensor, send data to cloud, wait a second, to not
         //overload the 4 messages per second limit on the cloud.
-        if ((n % 4)==0) {
+        if ((n % 2)==0) {
             Particle.process();
             delay(1000);
         }
@@ -153,7 +153,7 @@ void doMeasurement(){
         /*construct the message for this measurement. First the sensor number, where A0 = 10, A1 = 11 
         etc. Then the time (epoch), than the measurement (volts at digital pin)
         */
-        String pubMessage = String(A0 + n, DEC) + ","+String(currentTime) + "," + String(volts,2);
+        String pubMessage = "A" + String(n, DEC) + ","+String(currentTime) + "," + String(volts,2);
         
         //write pubMessage to OpenLog
         if (settings.storeLocal == TRUE) Serial1.println(pubMessage);
@@ -161,7 +161,8 @@ void doMeasurement(){
         //Publish to cloud
         if (Particle.connected()){
             offline = FALSE;
-            Particle.publish(topicString,pubMessage,PRIVATE);
+            Particle.publish(topicString + "/raw",pubMessage,PRIVATE);
+            Particle.publish(topicString + "/A" + String(n, DEC),String(volts,2),PRIVATE);
         } else {
             if (offline){
                 if ((millis() - offlineTime) > OFFLINETIMELIMIT){
