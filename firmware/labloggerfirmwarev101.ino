@@ -253,6 +253,16 @@ void handleSettings(const char *topic, const char *data){
                 Particle.publish("logging","nrOfSensors set to " + String(settings.nrOfSensors));
             }
         /*
+        if "topic" is the settingType, the data will be set as the new topic used for publishing to 
+        the Partilce Cloud
+        */
+        } else if (settingType == "topic"){
+            
+            stringData.toCharArray(settings.topic,64);
+            topicString = String(settings.topic);
+            Particle.publish("logging","topic set to: " + topicString);
+            EEPROM.put(addr, settings);
+        /*
         Any other settingsType will results in a published error.
         */
         } else {
